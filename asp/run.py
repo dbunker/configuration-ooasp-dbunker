@@ -53,18 +53,18 @@ def parse_term(s):
       3. Returns the nested tuple structure.
     """
     tokens = tokenize(s)
-    node, index = _parse_expr(tokens, 0)
+    node, index = parse_expr(tokens, 0)
     if index != len(tokens):
         raise ValueError("Extra tokens remaining after parse.")
     return node
 
 
-def _parse_expr(tokens, i):
+def parse_expr(tokens, i):
     """
     Parse a single 'Term':
     
       Term =
-        '(' ArgList ')'            => (None, ( ... ))
+        '(' ArgList ')'           => (None, ( ... ))
       | NAME '(' ArgList ')'      => (NAME, ( ... ))
       | NAME                      => 'NAME'
     
@@ -78,7 +78,7 @@ def _parse_expr(tokens, i):
     # Case 1: Parenthesized expression => ( None, (...subterms...) )
     if token == '(':
         i += 1  # consume '('
-        args, i = _parse_arglist(tokens, i)
+        args, i = parse_arglist(tokens, i)
         if i >= len(tokens) or tokens[i] != ')':
             raise ValueError("Missing closing ')' in parenthesized expression.")
         i += 1  # consume ')'
@@ -87,22 +87,26 @@ def _parse_expr(tokens, i):
     # Otherwise, it should be a name (quoted or unquoted)
     # Then we may or may not see '(' to indicate arguments.
     name = token
-    i += 1  # consume name
+
+    # Consume name
+    i += 1  
 
     if i < len(tokens) and tokens[i] == '(':
-        # parse arguments: (NAME, ( ... ))
-        i += 1  # consume '('
-        args, i = _parse_arglist(tokens, i)
+        # Parse arguments: (NAME, ( ... ))
+        # Consume '('
+        i += 1  
+        args, i = parse_arglist(tokens, i)
         if i >= len(tokens) or tokens[i] != ')':
             raise ValueError("Missing closing ')' after function-like call.")
-        i += 1  # consume ')'
+        # Consume ')'
+        i += 1
         return (name, tuple(args)), i
     else:
-        # No '(' follows => it's just a bare name like "OtherThing"
+        # No '(' follows => it's another bare name
         return name, i
 
 
-def _parse_arglist(tokens, i):
+def parse_arglist(tokens, i):
     """
     Parse a comma-separated list of terms (ArgList).
     
@@ -110,13 +114,14 @@ def _parse_arglist(tokens, i):
     """
     args = []
     # Must parse at least one term
-    node, i = _parse_expr(tokens, i)
+    node, i = parse_expr(tokens, i)
     args.append(node)
 
     # Repeatedly parse ", Term"
     while i < len(tokens) and tokens[i] == ',':
-        i += 1  # consume ','
-        node, i = _parse_expr(tokens, i)
+        # Consume ','
+        i += 1  
+        node, i = parse_expr(tokens, i)
         args.append(node)
 
     return args, i
@@ -132,12 +137,12 @@ def to_string(node):
       * If label is a string, it represents something like label(term1, term2).
     """
     if isinstance(node, str):
-        # Atomic: e.g. "OtherThing", or "thingC" (may be with or without quotes)
+        # Atomic string, may be with or without quotes
         return node
-    
+
     # Otherwise, node is a two-element tuple
     label, children = node  # children is itself a tuple of sub-nodes
-    
+
     # Convert child nodes into comma-separated string
     inside = ", ".join(to_string(child) for child in children)
     
@@ -171,9 +176,9 @@ def print_model(solution):
         print('')
 
 
-def cleansed(s):
+def cleansed(all):
     # return [ val for val in s if val.startswith("at(") or val.startswith("assign(") ]
-    return s
+    return all
 
 
 def show_solutions(ref_solutions_seet, solutions_set):
@@ -184,9 +189,9 @@ def show_solutions(ref_solutions_seet, solutions_set):
     ref_solutions = sorted(ref_solutions_seet)
     solutions = sorted(solutions_set)
 
-    for i in range(len(ref_solutions)):
+    for i in range(len(solutions)):
         print(i)
-        print_model(ref_solutions[i])
+        print_model(solutions[i])
 
     exit()
 
@@ -298,7 +303,7 @@ def test(args):
     else: print("FAILURE")
 
 
-# Command: python run.py -e modules-encoding.lp -i test_instances -s solutions/modules
+# Command: python run.py -e modules-encoding.lp -i instances/test -s solutions/modules
 def parse():
 
     parser = argparse.ArgumentParser(

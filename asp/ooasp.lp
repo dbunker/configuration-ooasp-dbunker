@@ -84,6 +84,13 @@
 % Model "v1" is associated with  to class "Module" that has attribute "gears" with possible value "Hub"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Constraints
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ooasp_cv(I, minviolated(O1, A))
+% For instance I, minimum constraint violated for object O1, attribute A
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #const max_instance_per_leaf_class = 10.
 #const int_domain_max = 20.
@@ -104,33 +111,80 @@ ooasp_attribute_value(I, AT, O, V) :- partial(ooasp_attribute_value(I, AT, O, V)
 % Generate instantiation 
 ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
 
-% instantiate objects using possible instance ids
-{ ooasp_isa(I, C, (C,O)) } :-
-	ooasp_instantiation(M, I), ooasp_class(M, C), not ooasp_subclass(M, _, C), possible_instance_id(O).
+% Instantiate objects using possible instance ids
+{ ooasp_isa(I, C, (C, O)) } :-
+    ooasp_instantiation(M, I), ooasp_class(M, C), not ooasp_subclass(M, _, C), possible_instance_id(O).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% 
+% Get total number of each object
+number_objects(I, C, NUM) :- ooasp_isa(I, C, (C, _)), NUM = #count { O : ooasp_isa(I, C, (C, O)) }.
+
+#show number_objects/3.
+
+% Generate possible ooasp_associated based on assoc
+% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
+{ ooasp_associated(I, A, (C1, O1), (C2, O2)) } :- 
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, _, _, C2, _, _),
+    ooasp_isa(I, C1, (C1, O1)),
+    ooasp_isa(I, C2, (C2, O2)).
+
+% ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
+% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_isa("c1", "ElementA", ("ElementA", 10))
+% ooasp_isa("c1", "ModuleA", ("ModuleA", _))
+% Existance of (C1, O1) and assoc ( C1 to C2 ) implies association ( C1 to C2 )
+:- not ooasp_associated(I, A, (C1, O1), (C2, 3)),
+    ooasp_instantiation(M, I),
+    ooasp_isa(I, C1, (C1, O1)),
+    ooasp_assoc(M, A, C1, 1, 1, C2, 1, 1),
+    possible_instance_id(O2).
+
+% ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, MIN_C2, MAX_C2)
+
+
+ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+
+% Generate from subclass
+% ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_subclass(M, C, SC)
+% ooasp_subclass("v1", "ElementA", "Element").
+ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
+    ooasp_instantiation(M, I),
+    ooasp_subclass(M, C1_SUPER, C1),
+    ooasp_subclass(M, C2_SUPER, C2),
+    ooasp_assoc(M, A_SUPER, C1_SUPER, MIN_C1_SUPER, MAX_C1_SUPER, (C2_SUPER, O2_SUPER)),
+    ooasp_associated(I, A, (C1, O1), (C2, O2)).
+
+
+% Potentially generate ooasp_attribute_value
+% ooasp_attribute_value(I, AT, O, VAL)
+% ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
+
+% { ooasp_attribute_value(I, AT, (C, O), VAL) } :- 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% symmetry breaking and minimization
+% Symmetry breaking and minimization
 
-% instantiation of objects must be done in ascending order with no
+% Instantiation of objects must be done in ascending order with no
 % gaps, unless the objects is given as part of the input partial
 % instantiation
 :- ooasp_isa(I, C, (C,ID1)), not partial(ooasp_isa(I, C, (C,ID1))),
-	 possible_instance_id(ID2), ID2 < ID1, not ooasp_isa(I, C, (C,ID2)).
+     possible_instance_id(ID2), ID2 < ID1, not ooasp_isa(I, C, (C,ID2)).
 
-% for each association, the mapping from the first object to the
+% For each association, the mapping from the first object to the
 % second must be monotonic, unless the association is given as part of
 % the input partial instantiation
 :- ooasp_associated(I,A,O1,O2), not partial(ooasp_associated(I,A,O1,O2)),
-	 ooasp_associated(I,A,O3,O4),  not partial(ooasp_associated(I,A,O3,O4)),
-	 O1 < O3, O4 < O2.
+     ooasp_associated(I,A,O3,O4), not partial(ooasp_associated(I,A,O3,O4)),
+     O1 < O3, O4 < O2.
 
-% minimize number of instantiated objects
+% Minimize number of instantiated objects
 #minimize { 1, I, C, O : ooasp_isa(I, C, O) }.
 
 #show ooasp_instantiation/2.

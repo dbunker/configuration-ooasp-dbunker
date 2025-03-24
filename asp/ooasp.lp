@@ -128,7 +128,7 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
     ooasp_subclass(M, C, C_SUPER),
     ooasp_full_isa(I, C, (CS, OS)).
 
-#show ooasp_full_isa/3.
+% #show ooasp_full_isa/3.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate ooasp_associated
@@ -192,40 +192,32 @@ number_class(I, C1, NUM) :-
     NUM_ASSOCIATED < NUM_CLASS,
     C1="ElementA".
 
+% ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
+
+% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 2))
+
+% number_associated("c1", ("ElementA", 10), "ModuleA", NUM), NUM != 1
+
+% Set number associated based on max and min set by assoc
+% Forbid too small
+:- number_associated(I, (C1, O1), C2, NUM),
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
+    NUM < MIN_C2.
+
+% Forbid too large
+:- number_associated(I, (C1, O1), C2, NUM),
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
+    NUM > MAX_C2.
+
+
 :-  number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
     number_class(I, C1, NUM_CLASS),
     NUM_ASSOCIATED < NUM_CLASS,
     C1="ElementB".
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% % Count for object generation, all O1 are grouped together and iterated, only performed on leaf classes
-% number_leaf_to_object_isa(I, C1, NUM) :- 
-%     not ooasp_subclass(I, _, C1),
-%     ooasp_isa(I, C1, (C1, _)),
-%     NUM = #count { O1 : ooasp_isa(I, C1, (C1, O1)) }.
-% #show number_leaf_to_object_isa/3.
-
-% % Count for object generation, all O1 are grouped together and iterated, connect to associated
-% number_leaf_to_object_associated(I, C1, NUM) :- 
-%     not ooasp_subclass(I, _, C1),
-%     ooasp_isa(I, C1, (C1, _)), 
-%     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
-% #show number_leaf_to_object_associated/3.
-
-% % Number of leaves should match number associated if assoc is present
-% :- number_leaf_to_object_associated(I, C1, NUM_A),
-%     ooasp_instantiation(M, I),
-%     ooasp_assoc(M, A, C1, _, _, C2, _, _),
-%     number_leaf_to_object_isa(I, C1, NUM_B),
-%     NUM_A != NUM_B.
-
-% % Prevent doubling up on association IDs
-% :-  ooasp_associated(I, A, (C1_A, O1_A), (C2_A, O2_A)),
-%     ooasp_associated(I, A, (C1_A, O1_A), (C2_B, O2_B)),
-%     ooasp_instantiation(M, I),
-%     ooasp_assoc(M, A, C1, _, _, C2, 1, 1),
-%     (C2_A, O2_A) < (C2_B, O2_B).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Superclasses
@@ -233,15 +225,15 @@ number_class(I, C1, NUM) :-
 % ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
 % ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
 
-% % Must have ooasp_associated for superclass
-% % ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
-% % ooasp_subclass("v1", "ElementA", "Element").
-% ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
-%     ooasp_instantiation(M, I),
-%     ooasp_associated(I, A, (C1, O1), (C2, O2)),
-%     ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
-%     ooasp_subclass(M, C1, C1_SUPER),
-%     ooasp_subclass(M, C2, C2_SUPER).
+% Must have ooasp_associated for superclass
+% ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_subclass("v1", "ElementA", "Element").
+:- not ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)),
+    ooasp_instantiation(M, I),
+    ooasp_associated(I, A, (C1, O1), (C2, O2)),
+    ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
+    ooasp_subclass(M, C1, C1_SUPER),
+    ooasp_subclass(M, C2, C2_SUPER).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Top Level

@@ -116,15 +116,28 @@ ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
     ooasp_instantiation(M, I), ooasp_class(M, C), not ooasp_subclass(M, _, C), possible_instance_id(O).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Generate ooasp_associated
 
-ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
-ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+% Generate possible ooasp_associated based on assoc
+% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
+% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
+{ ooasp_associated(I, A, (C1, O1), (C2, O2)) } :-
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, _, _, C2, _, _),
+    ooasp_isa(I, C1, (C1, O1)),
+    ooasp_isa(I, C2, (C2, O2)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get number of each object associated with (C1, O1)
-number_objects(I, C1, O1, NUM) :- 
+number_objects(I, (C1, O1), C2, NUM) :- 
+    ooasp_instantiation(M, I),
     ooasp_associated(I, A, (C1, O1), _), 
+    ooasp_assoc(M, A, C1, _, _, C2, _, _),
     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
 #show number_objects/4.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Count for object generation, all O1 are grouped together and iterated, only performed on leaf classes
 number_leaf_to_object_isa(I, C1, NUM) :- 
@@ -140,15 +153,6 @@ number_leaf_to_object_associated(I, C1, NUM) :-
     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
 #show number_leaf_to_object_associated/3.
 
-% Generate possible ooasp_associated based on assoc
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
-{ ooasp_associated(I, A, (C1, O1), (C2, O2)) } :-
-    ooasp_instantiation(M, I),
-    ooasp_assoc(M, A, C1, _, _, C2, _, _),
-    ooasp_isa(I, C1, (C1, O1)),
-    ooasp_isa(I, C2, (C2, O2)).
-
 % Number of leaves should match number associated if assoc is present
 :- number_leaf_to_object_associated(I, C1, NUM_A),
     ooasp_instantiation(M, I),
@@ -157,55 +161,46 @@ number_leaf_to_object_associated(I, C1, NUM) :-
     NUM_A != NUM_B.
 
 % Prevent doubling up on association IDs
-:- ooasp_associated(I, A, (C1, O1), (C2_A, O2_A)),
-    ooasp_associated(I, A, (C1, O1), (C2_B, O2_B)), 
+:-  ooasp_associated(I, A, (C1_A, O1_A), (C2_A, O2_A)),
+    ooasp_associated(I, A, (C1_A, O1_A), (C2_B, O2_B)),
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, _, _, C2, 1, 1),
     (C2_A, O2_A) < (C2_B, O2_B).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Superclasses
 
-% Existance of (C1, O1) and assoc ( C1 to C2 ) implies existance of (C2, O2)
-% ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, MIN_C2, MAX_C2)
-% ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_isa("c1", "ElementA", ("ElementA", 10))
-% ooasp_isa("c1", "ModuleA", ("ModuleA", _))
+ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
 
-% :- not ooasp_associated(I, A, (C1, O1), (C2, O2)),
-%     ooasp_instantiation(M, I),
-%     ooasp_isa(I, C1, (C1, O1)),
-%     ooasp_assoc(M, A, C1, 1, 1, C2, 1, 1),
-%     possible_instance_id(O2),
-%     ooasp_associated(I, A, (C1_OTH, O1_OTH), (C2_OTH, O2_OTH)),
-%     O1!=O1_OTH.
-
-% #show violated/4.
-
-% :- not ooasp_associated(I, A, (C1, O1), (C2, O2)),
-%     ooasp_instantiation(M, I),
-%     ooasp_isa(I, C1, (C1, O1)),
-%     ooasp_assoc(M, A, C1, 1, 1, C2, 1, 1),
-%     possible_instance_id(O2),
-%     number_objects(I, C1, NUM),
-%     O2 <= NUM.
-
-
-
-% Generate from subclass
+% Must have ooasp_associated for superclass
 % ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_subclass(M, C, SC)
 % ooasp_subclass("v1", "ElementA", "Element").
-% ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
+ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
+    ooasp_instantiation(M, I),
+    ooasp_associated(I, A, (C1, O1), (C2, O2)),
+    ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
+    ooasp_subclass(M, C1, C1_SUPER),
+    ooasp_subclass(M, C2, C2_SUPER).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Top Level
+
+% :- not ooasp_isa("c1", "ModuleA", ("ModuleA", 1)).
+
+% :- not ooasp_isa("c1", "Frame", ("Frame", 1)).
+
+% ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1)).
+
+% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5).
+% :- not ooasp_isa(I, "Frame", ("Frame", _)),
 %     ooasp_instantiation(M, I),
-%     ooasp_subclass(M, C1_SUPER, C1),
-%     ooasp_subclass(M, C2_SUPER, C2),
-%     ooasp_assoc(M, A_SUPER, C1_SUPER, MIN_C1_SUPER, MAX_C1_SUPER, (C2_SUPER, O2_SUPER)),
-%     ooasp_associated(I, A, (C1, O1), (C2, O2)).
+%     ooasp_assoc(M, "Frame_modules", "Frame", 1, 1, "Module", 0, 5).
 
 
-% Potentially generate ooasp_attribute_value
-% ooasp_attribute_value(I, AT, O, VAL)
-% ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Attribute Values
 
-% { ooasp_attribute_value(I, AT, (C, O), VAL) } :- 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

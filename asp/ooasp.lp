@@ -116,6 +116,21 @@ ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
     ooasp_instantiation(M, I), ooasp_class(M, C), not ooasp_subclass(M, _, C), possible_instance_id(O).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Extend to superclasses
+
+% Base case
+ooasp_full_isa(I, C, (C, O)) :-
+    ooasp_isa(I, C, (C, O)).
+
+% Extend
+ooasp_full_isa(I, C_SUPER, (C_SUB, O_SUB)) :-
+    ooasp_instantiation(M, I),
+    ooasp_subclass(M, C, C_SUPER),
+    ooasp_full_isa(I, C, (C_SUB, O_SUB)).
+
+#show ooasp_full_isa/3.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate ooasp_associated
 
 % Generate possible ooasp_associated based on assoc
@@ -123,49 +138,94 @@ ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
 % ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 { ooasp_associated(I, A, (C1, O1), (C2, O2)) } :-
     ooasp_instantiation(M, I),
-    ooasp_assoc(M, A, C1, _, _, C2, _, _),
+    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     ooasp_isa(I, C1, (C1, O1)),
     ooasp_isa(I, C2, (C2, O2)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Generate instances needed from assoc
 
-% Get number of each object associated with (C1, O1)
-number_objects(I, (C1, O1), C2, NUM) :- 
+% Leaf class
+leaf_class(M, C) :-
+    ooasp_class(M, C),
+    not ooasp_subclass(M, _, C).
+
+% If a leaf class and in assoc must instantiate somewhere
+:-  not ooasp_isa(I, C, (C, _)),
     ooasp_instantiation(M, I),
-    ooasp_associated(I, A, (C1, O1), _), 
-    ooasp_assoc(M, A, C1, _, _, C2, _, _),
-    NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
-#show number_objects/4.
+    leaf_class(M, C),
+    ooasp_assoc(M, _, C, 1, 1, _, _, _).
+
+% Same for associated
+:-  not ooasp_isa(I, C, (C, _)),
+    ooasp_instantiation(M, I),
+    leaf_class(M, C),
+    ooasp_assoc(M, _, _, 1, 1, C, _, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Count for object generation, all O1 are grouped together and iterated, only performed on leaf classes
-number_leaf_to_object_isa(I, C1, NUM) :- 
-    not ooasp_subclass(I, _, C1),
-    ooasp_isa(I, C1, (C1, _)),
-    NUM = #count { O1 : ooasp_isa(I, C1, (C1, O1)) }.
-#show number_leaf_to_object_isa/3.
+% Total count for each object to class pair
+number_associated(I, (C1, O1), C2, NUM) :- 
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
+    ooasp_associated(I, A, (C1, O1), (C2, _)), 
+    NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
+#show number_associated/4.
 
-% Count for object generation, all O1 are grouped together and iterated, connect to associated
-number_leaf_to_object_associated(I, C1, NUM) :- 
-    not ooasp_subclass(I, _, C1),
+% Total count for each class to class pair
+number_associated_pair(I, C1, C2, NUM) :- 
+    ooasp_instantiation(M, I),
+    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     ooasp_isa(I, C1, (C1, _)), 
     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
-#show number_leaf_to_object_associated/3.
+#show number_associated_pair/4.
 
-% Number of leaves should match number associated if assoc is present
-:- number_leaf_to_object_associated(I, C1, NUM_A),
-    ooasp_instantiation(M, I),
-    ooasp_assoc(M, A, C1, _, _, C2, _, _),
-    number_leaf_to_object_isa(I, C1, NUM_B),
-    NUM_A != NUM_B.
+% Total count for each class
+number_class(I, C1, NUM) :- 
+    ooasp_isa(I, C1, (C1, _)),
+    NUM = #count { O1 : ooasp_isa(I, C1, (C1, O1)) }.
+#show number_class/3.
 
-% Prevent doubling up on association IDs
-:-  ooasp_associated(I, A, (C1_A, O1_A), (C2_A, O2_A)),
-    ooasp_associated(I, A, (C1_A, O1_A), (C2_B, O2_B)),
-    ooasp_instantiation(M, I),
-    ooasp_assoc(M, A, C1, _, _, C2, 1, 1),
-    (C2_A, O2_A) < (C2_B, O2_B).
+% Must have at least enough classes to be associated where needed
+:-  number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
+    number_class(I, C1, NUM_CLASS),
+    NUM_ASSOCIATED < NUM_CLASS,
+    C1="ElementA".
+
+:-  number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
+    number_class(I, C1, NUM_CLASS),
+    NUM_ASSOCIATED < NUM_CLASS,
+    C1="ElementB".
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% % Count for object generation, all O1 are grouped together and iterated, only performed on leaf classes
+% number_leaf_to_object_isa(I, C1, NUM) :- 
+%     not ooasp_subclass(I, _, C1),
+%     ooasp_isa(I, C1, (C1, _)),
+%     NUM = #count { O1 : ooasp_isa(I, C1, (C1, O1)) }.
+% #show number_leaf_to_object_isa/3.
+
+% % Count for object generation, all O1 are grouped together and iterated, connect to associated
+% number_leaf_to_object_associated(I, C1, NUM) :- 
+%     not ooasp_subclass(I, _, C1),
+%     ooasp_isa(I, C1, (C1, _)), 
+%     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
+% #show number_leaf_to_object_associated/3.
+
+% % Number of leaves should match number associated if assoc is present
+% :- number_leaf_to_object_associated(I, C1, NUM_A),
+%     ooasp_instantiation(M, I),
+%     ooasp_assoc(M, A, C1, _, _, C2, _, _),
+%     number_leaf_to_object_isa(I, C1, NUM_B),
+%     NUM_A != NUM_B.
+
+% % Prevent doubling up on association IDs
+% :-  ooasp_associated(I, A, (C1_A, O1_A), (C2_A, O2_A)),
+%     ooasp_associated(I, A, (C1_A, O1_A), (C2_B, O2_B)),
+%     ooasp_instantiation(M, I),
+%     ooasp_assoc(M, A, C1, _, _, C2, 1, 1),
+%     (C2_A, O2_A) < (C2_B, O2_B).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Superclasses

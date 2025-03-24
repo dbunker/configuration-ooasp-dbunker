@@ -119,14 +119,14 @@ ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
 % Extend to superclasses
 
 % Base case
-ooasp_full_isa(I, C, (C, O)) :-
-    ooasp_isa(I, C, (C, O)).
+ooasp_full_isa(I, C, (CS, OS)) :-
+    ooasp_isa(I, C, (CS, OS)).
 
 % Extend
-ooasp_full_isa(I, C_SUPER, (C_SUB, O_SUB)) :-
+ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
     ooasp_instantiation(M, I),
     ooasp_subclass(M, C, C_SUPER),
-    ooasp_full_isa(I, C, (C_SUB, O_SUB)).
+    ooasp_full_isa(I, C, (CS, OS)).
 
 #show ooasp_full_isa/3.
 
@@ -136,11 +136,11 @@ ooasp_full_isa(I, C_SUPER, (C_SUB, O_SUB)) :-
 % Generate possible ooasp_associated based on assoc
 % ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
 % ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
-{ ooasp_associated(I, A, (C1, O1), (C2, O2)) } :-
+{ ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) } :-
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
-    ooasp_isa(I, C1, (C1, O1)),
-    ooasp_isa(I, C2, (C2, O2)).
+    ooasp_full_isa(I, C1, (CS1, OS1)),
+    ooasp_full_isa(I, C2, (CS2, OS2)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate instances needed from assoc
@@ -176,14 +176,14 @@ number_associated(I, (C1, O1), C2, NUM) :-
 number_associated_pair(I, C1, C2, NUM) :- 
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
-    ooasp_isa(I, C1, (C1, _)), 
+    ooasp_full_isa(I, C1, (CS1, _)), 
     NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
 #show number_associated_pair/4.
 
 % Total count for each class
 number_class(I, C1, NUM) :- 
-    ooasp_isa(I, C1, (C1, _)),
-    NUM = #count { O1 : ooasp_isa(I, C1, (C1, O1)) }.
+    ooasp_full_isa(I, C1, (_, _)),
+    NUM = #count { C1, CS1, OS1 : ooasp_full_isa(I, C1, (CS1, OS1)) }.
 #show number_class/3.
 
 % Must have at least enough classes to be associated where needed
@@ -230,18 +230,18 @@ number_class(I, C1, NUM) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Superclasses
 
-ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
-ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+% ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+% ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
 
-% Must have ooasp_associated for superclass
-% ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_subclass("v1", "ElementA", "Element").
-ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
-    ooasp_instantiation(M, I),
-    ooasp_associated(I, A, (C1, O1), (C2, O2)),
-    ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
-    ooasp_subclass(M, C1, C1_SUPER),
-    ooasp_subclass(M, C2, C2_SUPER).
+% % Must have ooasp_associated for superclass
+% % ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
+% % ooasp_subclass("v1", "ElementA", "Element").
+% ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)) :-
+%     ooasp_instantiation(M, I),
+%     ooasp_associated(I, A, (C1, O1), (C2, O2)),
+%     ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
+%     ooasp_subclass(M, C1, C1_SUPER),
+%     ooasp_subclass(M, C2, C2_SUPER).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Top Level

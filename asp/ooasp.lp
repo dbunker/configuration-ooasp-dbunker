@@ -165,59 +165,56 @@ leaf_class(M, C) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Total count for each object to class pair
-number_associated(I, (C1, O1), C2, NUM) :- 
+_number_associated(I, (C1, O1), C2, NUM) :- 
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     ooasp_associated(I, A, (C1, O1), (C2, _)), 
-    NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
-#show number_associated/4.
+    NUM = #count { C2, O2 : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
+#show _number_associated/4.
 
 % Total count for each class to class pair
-number_associated_pair(I, C1, C2, NUM) :- 
+_number_associated_pair(I, C1, C2, NUM) :- 
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     ooasp_full_isa(I, C1, (CS1, _)), 
-    NUM = #count { (C2, O2) : ooasp_associated(I, A, (C1, _), (C2, O2)) }.
-#show number_associated_pair/4.
+    NUM = #count { CS2, OS2 : ooasp_associated(I, A, (_, _), (CS2, OS2)) }.
+#show _number_associated_pair/4.
 
 % Total count for each class
-number_class(I, C1, NUM) :- 
+_number_class(I, C1, NUM) :- 
     ooasp_full_isa(I, C1, (_, _)),
     NUM = #count { C1, CS1, OS1 : ooasp_full_isa(I, C1, (CS1, OS1)) }.
-#show number_class/3.
+#show _number_class/3.
 
 % Must have at least enough classes to be associated where needed
-:-  number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
-    number_class(I, C1, NUM_CLASS),
-    NUM_ASSOCIATED < NUM_CLASS,
-    C1="ElementA".
+:-  _number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
+    _number_class(I, C1, NUM_CLASS),
+    NUM_ASSOCIATED < NUM_CLASS.
+
+
+% :- not ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1)).
+% :- not ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 2))
+
 
 % ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
 
 % ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
 % ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 2))
 
-% number_associated("c1", ("ElementA", 10), "ModuleA", NUM), NUM != 1
+% _number_associated("c1", ("ElementA", 10), "ModuleA", NUM), NUM != 1
 
 % Set number associated based on max and min set by assoc
 % Forbid too small
-:- number_associated(I, (C1, O1), C2, NUM),
+:- _number_associated(I, (C1, O1), C2, NUM),
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
     NUM < MIN_C2.
 
 % Forbid too large
-:- number_associated(I, (C1, O1), C2, NUM),
+:- _number_associated(I, (C1, O1), C2, NUM),
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
     NUM > MAX_C2.
-
-
-:-  number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
-    number_class(I, C1, NUM_CLASS),
-    NUM_ASSOCIATED < NUM_CLASS,
-    C1="ElementB".
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Superclasses

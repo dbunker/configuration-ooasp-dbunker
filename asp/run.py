@@ -16,6 +16,7 @@ def call_clingo(clingo, input_names, timeout):
         "--warn=no-file-included",
         "--warn=no-operation-undefined",
         "--warn=no-global-variable",
+        "--opt-mode=optN",
         "--outf=2"
     ] + input_names
 
@@ -176,29 +177,33 @@ def print_model(solution):
         print('')
 
 
-def cleansed(all):
-    # return [ val for val in s if val.startswith("at(") or val.startswith("assign(") ]
-    return all
-
-
-def show_solutions(ref_solutions_seet, solutions_set):
+def show_solutions(ref_solutions_set, solutions_set):
 
     my_ind = 0
     ref_ind = 0
 
-    ref_solutions = sorted(ref_solutions_seet)
+    ref_solutions = sorted(ref_solutions_set)
     solutions = sorted(solutions_set)
 
-    for i in range(len(ref_solutions)):
+    for i in range(len(solutions)):
         print(i)
-        print_model(ref_solutions[i])
-
+        print_model(solutions[i])
+        exit()
     exit()
 
     while my_ind < len(solutions) or ref_ind < len(ref_solutions):
 
-        my_sol = solutions[my_ind] if my_ind < len(solutions) else []
-        ref_sol = ref_solutions[ref_ind] if ref_ind < len(ref_solutions) else []
+        my_sol_set = solutions[my_ind] if my_ind < len(solutions) else frozenset()
+        ref_sol_set = ref_solutions[ref_ind] if ref_ind < len(ref_solutions) else frozenset()
+
+        my_sol = list(my_sol_set)
+        ref_sol = list(ref_sol_set)
+
+        print('---------------------------------')
+        print(my_sol_set == ref_sol_set)
+        print('In mine, not ref:', my_sol_set - ref_sol_set)
+        print('In ref, not mine:', ref_sol_set - my_sol_set)
+        print('---------------------------------')
 
         if my_sol == []:
 
@@ -212,7 +217,7 @@ def show_solutions(ref_solutions_seet, solutions_set):
             print_model(my_sol)
             my_ind += 1
 
-        elif cleansed(my_sol) == ref_sol:
+        elif my_sol_set == ref_sol_set:
 
             print(f"Correct: my={my_ind} ref={ref_ind}")
             my_ind += 1
@@ -302,6 +307,8 @@ def test(args):
     if success: print("SUCCESS")
     else: print("FAILURE")
 
+
+# python test.py -e modules-encoding.lp -i instances/modules -s solutions/modules --opt -t 120
 
 # Command: python run.py -e modules-encoding.lp -i instances/test -s solutions/modules
 def parse():

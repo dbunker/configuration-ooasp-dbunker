@@ -39,7 +39,34 @@ ooasp_assoc("v1", "ElementB_moduleB", "ElementB", 1, 1, "ModuleB", 1, 1).
 partial(ooasp_instantiation("v1","inst")).
 partial(ooasp_isa("inst", "Frame", ("Frame", 1))).
 partial(ooasp_isa("inst", "ModuleA", ("ModuleA", 2))).
-partial(ooasp_isa("inst", "ModuleB", ("ModuleB", 3))).
-partial(ooasp_isa("inst","ElementA", ("ElementA", 4))).
+partial(ooasp_isa("inst", "ModuleA", ("ModuleA", 3))).
 
 partial(ooasp_associated("inst", "Frame_modules", ("Frame", 1), ("ModuleA", 2))).
+partial(ooasp_associated("inst", "Frame_modules", ("Frame", 1), ("ModuleA", 3))).
+
+partial(ooasp_attribute_value("inst","position",("ModuleA",2),1)).
+partial(ooasp_attribute_value("inst","position",("ModuleA",3),3)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ooasp_associated("inst", "ElementA_moduleA", ("ElementA", 1), ("ModuleA", 2)).
+ooasp_associated("inst", "ElementA_moduleA", ("ElementA", 2), ("ModuleA", 3)).
+ooasp_associated("inst", "Element_module", ("ElementA", 1), ("ModuleA", 2)).
+ooasp_associated("inst", "Element_module", ("ElementA", 2), ("ModuleA", 3)).
+ooasp_associated("inst", "Frame_modules", ("Frame", 1), ("ModuleA", 2)).
+ooasp_associated("inst", "Frame_modules", ("Frame", 1), ("ModuleA", 3)).
+
+
+ooasp_attribute_value("inst", "position", ("ModuleA", 2), 1).
+ooasp_attribute_value("inst", "position", ("ModuleA", 3), 3).
+
+
+ooasp_instantiation("v1", "inst").
+
+
+ooasp_isa("inst", "ElementA", ("ElementA", 1)).
+ooasp_isa("inst", "ElementA", ("ElementA", 2)).
+ooasp_isa("inst", "Frame", ("Frame", 1)).
+ooasp_isa("inst", "ModuleA", ("ModuleA", 2)).
+ooasp_isa("inst", "ModuleA", ("ModuleA", 3)).
+

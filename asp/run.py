@@ -214,16 +214,16 @@ def show_solutions(ref_solutions_set, solutions_set, args):
     my_ind = 0
     ref_ind = 0
 
-    ref_solutions = sorted(ref_solutions_set)
-    solutions = sorted(solutions_set)
+    ref_solutions = sorted([list(x) for x in list(ref_solutions_set)])
+    solutions = sorted([list(x) for x in list(solutions_set)])
     
     while (my_ind < len(solutions) or ref_ind < len(ref_solutions)) and (my_ind < num_to_show and ref_ind < num_to_show):
 
-        my_sol_set = solutions[my_ind] if my_ind < len(solutions) else frozenset()
-        ref_sol_set = ref_solutions[ref_ind] if ref_ind < len(ref_solutions) else frozenset()
+        my_sol_set = frozenset(solutions[my_ind]) if my_ind < len(solutions) else frozenset()
+        ref_sol_set = frozenset(ref_solutions[ref_ind]) if ref_ind < len(ref_solutions) else frozenset()
 
-        my_sol = list(my_sol_set)
-        ref_sol = list(ref_sol_set)
+        my_sol = sorted(list(my_sol_set))
+        ref_sol = sorted(list(ref_sol_set))
 
         print('---------------------------------')
         print(my_sol_set == ref_sol_set)

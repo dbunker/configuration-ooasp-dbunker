@@ -146,22 +146,22 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate instances needed based on assoc
 
-% Leaf class
-leaf_class(M, C) :-
-    ooasp_class(M, C),
-    not ooasp_subclass(M, _, C).
+% % Leaf class
+% leaf_class(M, C) :-
+%     ooasp_class(M, C),
+%     not ooasp_subclass(M, _, C).
 
-% If a leaf class and in assoc must instantiate somewhere
-:-  not ooasp_isa(I, C, (C, _)),
-    ooasp_instantiation(M, I),
-    leaf_class(M, C),
-    ooasp_assoc(M, _, C, _, _, _, _, _).
+% % If a leaf class and in assoc must instantiate somewhere
+% :-  not ooasp_isa(I, C, (C, _)),
+%     ooasp_instantiation(M, I),
+%     leaf_class(M, C),
+%     ooasp_assoc(M, _, C, _, _, _, _, _).
 
-% Also instantiate associated
-:-  not ooasp_isa(I, C, (C, _)),
-    ooasp_instantiation(M, I),
-    leaf_class(M, C),
-    ooasp_assoc(M, _, _, _, _, C, _, _).
+% % Also instantiate associated
+% :-  not ooasp_isa(I, C, (C, _)),
+%     ooasp_instantiation(M, I),
+%     leaf_class(M, C),
+%     ooasp_assoc(M, _, _, _, _, C, _, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -176,14 +176,12 @@ leaf_class(M, C) :-
 number_associated(I, (C1, (CS1, OS1)), C2, NUM, MIN_C2, MAX_C2) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
-    ooasp_full_isa(I, C2, (_, _)),
     ooasp_assoc(M, A, C1, _, _, C2, MIN_C2, MAX_C2),
     NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
 % Total count for each associated object to class pair C2 to C1
 number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C1, (_, _)),
     ooasp_full_isa(I, C2, (CS2, OS2)),
     ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, _, _),
     NUM = #count { CS1, OS1 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.

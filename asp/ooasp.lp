@@ -184,7 +184,7 @@ number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
 
 % Set number associated based on min and max by assoc
 % Forbid too small
-:- number_associated(I, (C1, (CS1, OS1)), C2, NUM),
+:-  number_associated(I, (C1, (CS1, OS1)), C2, NUM),
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_full_isa(I, C2, (_, _)),
@@ -192,7 +192,7 @@ number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
     NUM < MIN_C2.
 
 % Forbid too large
-:- number_associated(I, (C1, (CS1, OS1)), C2, NUM),
+:-  number_associated(I, (C1, (CS1, OS1)), C2, NUM),
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_full_isa(I, C2, (_, _)),
@@ -212,17 +212,107 @@ number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
 % Must have ooasp_associated for superclass
 % Ex. ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
 % Ex. ooasp_subclass("v1", "ElementA", "Element")
-:- not ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)),
+:-  not ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)),
     ooasp_instantiation(M, I),
     ooasp_associated(I, AS, (CS1, OS1), (CS2, OS2)),
-    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     ooasp_full_isa(I, C1, (CS1, OS1)),
-    ooasp_full_isa(I, C2, (CS2, OS2)).
+    ooasp_full_isa(I, C2, (CS2, OS2)),
+    ooasp_assoc(M, A, C1, 1, 1, C2, _, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Attribute values
 
+% ooasp_attribute_value(I, AT, O, VAL)
+% ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
 
+% ooasp_attribute("v1", "Module", "position", "integer").
+% ooasp_attribute_minInclusive("v1", "Module", "position", 1).
+
+% For instance I, attribute AT of object O has value VAL
+% For instance "c1", attribute "position" of object ("ModuleA", 1) has value 1
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The ooasp_attribute_value must have one int value for integer
+{ ooasp_attribute_value(I, AT, (CS, OS), VAL) } :-
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "integer"),
+    ooasp_attribute_minInclusive(M, C, AT, MIN),
+    ooasp_attribute_maxInclusive(M, C, AT, MAX),
+    int_value(VAL),
+    VAL >= MIN,
+    VAL <= MAX.
+
+% Enforce int rule
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "integer"),
+    not int_value(VAL).
+
+% Enforce min rule
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "integer"),
+    ooasp_attribute_minInclusive(M, C, AT, MIN),
+    VAL < MIN.
+
+% Enforce max rule
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "integer"),
+    ooasp_attribute_maxInclusive(M, C, AT, MAX),
+    VAL > MAX. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Same construction for boolean
+{ ooasp_attribute_value(I, AT, (CS, OS), VAL) } :-
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "boolean"),
+    bool_value(VAL).
+
+% Enforce bool value rule
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "boolean"),
+    not bool_value(VAL).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Ex. ooasp_attribute_enum("v1", "Frame", "gears", "Hub").
+% Constraints on string type
+{ ooasp_attribute_value(I, AT, (CS, OS), VAL) } :-
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "string"),
+    ooasp_attribute_enum(M, C, AT, VAL).
+
+% Enforce string value rule
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, "string"),
+    not ooasp_attribute_enum(M, C, AT, VAL).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Enforce exactly one value rule for all
+% Must exist
+:-  not ooasp_attribute_value(I, AT, (CS, OS), _),
+    ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C, (CS, OS)),
+    ooasp_attribute(M, C, AT, _).
+
+% Cannot have duplicates
+:-  ooasp_attribute_value(I, AT, (CS, OS), VAL_A),
+    ooasp_attribute_value(I, AT, (CS, OS), VAL_B),
+    VAL_A != VAL_B.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

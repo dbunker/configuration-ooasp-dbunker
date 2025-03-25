@@ -6,9 +6,11 @@
 %
 % Your domain-specific constraint goes here...
 
+
 % Two modules of type ModuleA may not be adjacent to each other.
 %
 % Your domain-specific constraint goes here...
+
 
 % symmetry breaking for positions. For each frame, and each module
 % type, the mapping from modules of the same type to their positions

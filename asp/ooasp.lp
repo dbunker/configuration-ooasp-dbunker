@@ -172,14 +172,14 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 % Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", _)).
 % EX. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 
-% Total count for each associated object to class pair C1 to C2
+% Total count for each associated object to class pair C1 to C2 followed by max and min allowes
 number_associated(I, (C1, (CS1, OS1)), C2, NUM, MIN_C2, MAX_C2) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_assoc(M, A, C1, _, _, C2, MIN_C2, MAX_C2),
     NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
-% Total count for each associated object to class pair C2 to C1
+% Total count for each associated object to class pair C2 to C1 followed by max and min allowes
 number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C2, (CS2, OS2)),

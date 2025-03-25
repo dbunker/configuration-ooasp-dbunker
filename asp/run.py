@@ -7,6 +7,7 @@ import json
 import time
 import argparse
 import re
+import math
 
 
 def call_clingo(clingo, input_names, timeout):
@@ -177,21 +178,46 @@ def print_model(solution):
         print('')
 
 
-def show_solutions(ref_solutions_set, solutions_set):
+def print_models(my_sol, ref_sol, in_mine):
+    
+    if in_mine:
+        print("Present only in mine:")
+        print_model(my_sol)
+        print("Ref:")
+        print_model(ref_sol)
+    else:
+        print("Present only in ref:")
+        print_model(ref_sol)
+        print("Mine:")
+        print_model(my_sol)
+
+def show_solutions(ref_solutions_set, solutions_set, args):
+
+    num_to_show = math.inf
+    if args.number != None:
+        num_to_show = int(args.number)
+
+    if args.show_instances:
+        solutions = sorted(solutions_set)
+        for i in range(min(num_to_show, len(solutions))):
+            print(i)
+            print_model(solutions[i])
+        return
+    
+    if args.show_solutions:
+        ref_solutions = sorted(ref_solutions_set)
+        for i in range(min(num_to_show, len(ref_solutions))):
+            print(i)
+            print_model(ref_solutions[i])
+        return
 
     my_ind = 0
     ref_ind = 0
 
     ref_solutions = sorted(ref_solutions_set)
     solutions = sorted(solutions_set)
-
-    for i in range(len(solutions)):
-        print(i)
-        print_model(solutions[i])
-        exit()
-    exit()
-
-    while my_ind < len(solutions) or ref_ind < len(ref_solutions):
+    
+    while (my_ind < len(solutions) or ref_ind < len(ref_solutions)) and (my_ind < num_to_show and ref_ind < num_to_show):
 
         my_sol_set = solutions[my_ind] if my_ind < len(solutions) else frozenset()
         ref_sol_set = ref_solutions[ref_ind] if ref_ind < len(ref_solutions) else frozenset()
@@ -207,14 +233,12 @@ def show_solutions(ref_solutions_set, solutions_set):
 
         if my_sol == []:
 
-            print("Present only in ref:")
-            print_model(ref_sol)
+            print_models(my_sol, ref_sol, False)
             ref_ind += 1
 
         elif ref_sol == []:
 
-            print("Present only in mine:")
-            print_model(my_sol)
+            print_models(my_sol, ref_sol, True)
             my_ind += 1
 
         elif my_sol_set == ref_sol_set:
@@ -226,14 +250,12 @@ def show_solutions(ref_solutions_set, solutions_set):
         # Mine has extra solutions not present in ref as ref is farther along alphabetically
         elif my_sol < ref_sol:
 
-            print("Present only in mine:")
-            print_model(my_sol)
+            print_models(my_sol, ref_sol, True)
             my_ind += 1
 
         elif my_sol > ref_sol:
 
-            print("Present only in ref:")
-            print_model(ref_sol)
+            print_models(my_sol, ref_sol, False)
             ref_ind += 1
 
         print("MyInd", my_ind, len(solutions))
@@ -259,12 +281,9 @@ def get_solutions(output, optimize=True):
 
 def test_instance(args, instance):
 
-    # Default timeout
-    timeout = 180
-
-    options = [args.encoding, args.instances + "/" + instance, "0"]
-
     # Call clingo and get solutions
+    timeout = 180
+    options = [args.encoding, args.instances + "/" + instance, "0"]
     stdout, time = call_clingo("clingo", options, timeout)
     solutions = get_solutions(json.loads(stdout))
 
@@ -273,7 +292,7 @@ def test_instance(args, instance):
     with open(args.solutions + "/" + inst_sol, "r") as infile:
         ref_solutions = get_solutions(json.load(infile))
 
-    show_solutions(ref_solutions, solutions)
+    show_solutions(ref_solutions, solutions, args)
 
     return solutions == ref_solutions, time
 
@@ -318,10 +337,13 @@ def parse():
     )
     parser.add_argument("--encoding", "-e", metavar="<file>",
                         help="ASP encoding to test", required=True)
-    parser.add_argument("--instances", "-i", metavar="<path>",
-                        help="Directory of the instances", default="asp/instances", required=False)
-    parser.add_argument("--solutions", "-s", metavar="<path>",
-                        help="Directory of the solutions", default="asp/solutions", required=False)
+    parser.add_argument('--instances', '-i', metavar='<path>',
+                        help='Directory of the instances', default="asp/instances/", required=False)
+    parser.add_argument('--solutions', '-s', metavar='<path>',
+                        help='Directory of the solutions', default="asp/solutions/", required=False)
+    parser.add_argument('--show_instances', '-si', action='store_const', const=True, default=False, required=False)
+    parser.add_argument('--show_solutions', '-ss', action='store_const', const=True, default=False, required=False)
+    parser.add_argument('--number', '-n', default=None, required=False)
     args = parser.parse_args()
 
     return args

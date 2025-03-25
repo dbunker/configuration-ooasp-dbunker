@@ -21,8 +21,6 @@
     ooasp_attribute_value(I, "position", ("ModuleA", OS1), VAL_A),
     ooasp_attribute_value(I, "position", ("ModuleA", OS2), VAL_B),
     OS1 != OS2,
-    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), ("ModuleA", OS1)),
-    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), ("ModuleA", OS2)),
 	VAL_A == VAL_B+1.
 
 % symmetry breaking for positions. For each frame, and each module

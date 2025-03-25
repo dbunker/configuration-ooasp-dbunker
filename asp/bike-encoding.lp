@@ -2,12 +2,10 @@
 
 % Domain specific constraints
 
-% ooasp_attribute_value("c1", "wheel_size", ("WheelBack", 1), 14)
-% ooasp_attribute_value("c1", "wheel_size", ("WheelFront", 1), 14)
-% ooasp_attribute_value("c1", "child_model", ("Frame", 1), "TRUE")
-% ooasp_attribute_value("c1", "gears", ("Frame", 1), "Hub")
-% ooasp_associated("c1", "Frame_wheel_back", ("Frame", 1), ("WheelBack", 1))
-% ooasp_associated("c1", "Frame_wheel_front", ("Frame", 1), ("WheelFront", 2))
+% Ex. ooasp_attribute_value("c1", "wheel_size", ("WheelBack", 1), 14)
+% Ex. ooasp_attribute_value("c1", "child_model", ("Frame", 1), "TRUE")
+% Ex. ooasp_attribute_value("c1", "gears", ("Frame", 1), "Hub")
+% Ex. ooasp_associated("c1", "Frame_wheel_back", ("Frame", 1), ("WheelBack", 1))
 
 % The front and back wheels associated with a frame must be of the
 % same size.

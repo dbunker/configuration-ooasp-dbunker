@@ -216,7 +216,9 @@ def show_solutions(ref_solutions_set, solutions_set, args):
 
     ref_solutions = sorted([list(x) for x in list(ref_solutions_set)])
     solutions = sorted([list(x) for x in list(solutions_set)])
-    
+
+    print(ref_solutions == solutions)
+
     while (my_ind < len(solutions) or ref_ind < len(ref_solutions)) and (my_ind < num_to_show and ref_ind < num_to_show):
 
         my_sol_set = frozenset(solutions[my_ind]) if my_ind < len(solutions) else frozenset()
@@ -350,4 +352,3 @@ def parse():
 
 
 test(parse())
-

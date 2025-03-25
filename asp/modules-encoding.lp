@@ -2,8 +2,8 @@
 
 % Domain specific constraints
 
-% ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
-% ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1))
+% Ex. ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
+% Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1))
 
 % Two modules in the same frame cannot have the same position
 :-  ooasp_instantiation("v1", I),
@@ -23,7 +23,7 @@
     OS1 != OS2,
 	VAL_A == VAL_B+1.
 
-% symmetry breaking for positions. For each frame, and each module
+% Symmetry breaking for positions. For each frame, and each module
 % type, the mapping from modules of the same type to their positions
 % must be monotonic, unless the association is given in the input
 % partial instantiation.

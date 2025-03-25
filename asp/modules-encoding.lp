@@ -5,21 +5,25 @@
 % ooasp_attribute_value("c1", "position", ("ModuleA", 1), 1)
 % ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1))
 
-% Two modules in the same frame cannot have the same position.
-% 
-same_frame((CS1, OS1), (CS2, OS2)) :-  
-	ooasp_instantiation("v1", I),
+% Two modules in the same frame cannot have the same position
+:-  ooasp_instantiation("v1", I),
     ooasp_attribute_value(I, "position", (CS1, OS1), VAL_A),
     ooasp_attribute_value(I, "position", (CS2, OS2), VAL_B),
+	ooasp_full_isa(I, "Module", (CS1, OS1)),
+    ooasp_full_isa(I, "Module", (CS2, OS2)),
     (CS1, OS1) != (CS2, OS2),
     ooasp_associated(I, "Frame_modules", ("Frame", F_OS), (CS1, OS1)),
-    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), (CS2, OS2)).
+    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), (CS2, OS2)),
+	VAL_A == VAL_B.
 
-#show same_frame/2.
-
-% Two modules of type ModuleA may not be adjacent to each other.
-% 
-
+% Two modules of type ModuleA may not be adjacent to each other
+:-  ooasp_instantiation("v1", I),
+    ooasp_attribute_value(I, "position", ("ModuleA", OS1), VAL_A),
+    ooasp_attribute_value(I, "position", ("ModuleA", OS2), VAL_B),
+    OS1 != OS2,
+    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), ("ModuleA", OS1)),
+    ooasp_associated(I, "Frame_modules", ("Frame", F_OS), ("ModuleA", OS2)),
+	VAL_A == VAL_B+1.
 
 % symmetry breaking for positions. For each frame, and each module
 % type, the mapping from modules of the same type to their positions

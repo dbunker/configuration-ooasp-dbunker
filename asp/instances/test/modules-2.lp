@@ -36,6 +36,10 @@ ooasp_assoc("v1", "ElementB_moduleB", "ElementB", 1, 1, "ModuleB", 1, 1).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % partial encoding
 
-partial(ooasp_instantiation("v1", "c1")).
-partial(ooasp_isa("c1", "ElementA", ("ElementA", 10..12))).
-partial(ooasp_isa("c1", "ElementB", ("ElementB", 13..14))).
+partial(ooasp_instantiation("v1","inst")).
+partial(ooasp_isa("inst", "Frame", ("Frame", 1))).
+partial(ooasp_isa("inst", "ModuleA", ("ModuleA", 2))).
+partial(ooasp_isa("inst", "ModuleB", ("ModuleB", 3))).
+partial(ooasp_isa("inst","ElementA", ("ElementA", 4))).
+
+partial(ooasp_associated("inst", "Frame_modules", ("Frame", 1), ("ModuleA", 2))).

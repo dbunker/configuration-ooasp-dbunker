@@ -180,7 +180,7 @@ number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
     NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
-#show number_associated/4.
+% #show number_associated/4.
 
 % Set number associated based on min and max by assoc
 % Forbid too small
@@ -197,7 +197,7 @@ number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_full_isa(I, C2, (_, _)),
     ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
-    NUM > MAX_C2.
+    NUM != MAX_C2.
 
 % For each associated (CS1, OS1), (CS2, OS2) (ex. ("ElementA", 10), ("ModuleA", 1))
 % if OS1_A and OS1_B are different OS2_A and OS2_B must also be different

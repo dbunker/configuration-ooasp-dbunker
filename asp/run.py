@@ -189,9 +189,9 @@ def show_solutions(ref_solutions_seet, solutions_set):
     ref_solutions = sorted(ref_solutions_seet)
     solutions = sorted(solutions_set)
 
-    for i in range(len(solutions)):
+    for i in range(len(ref_solutions)):
         print(i)
-        print_model(solutions[i])
+        print_model(ref_solutions[i])
 
     exit()
 

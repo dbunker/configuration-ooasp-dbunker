@@ -4,10 +4,10 @@
 ooasp_class("v1", "HwObject").
 ooasp_class("v1", "Frame").
 ooasp_class("v1", "Module").
-ooasp_class("v1", "ModuleA"). 
+ooasp_class("v1", "ModuleA").
 ooasp_class("v1", "ModuleB").
 ooasp_class("v1", "Element").
-ooasp_class("v1", "ElementA"). 
+ooasp_class("v1", "ElementA").
 ooasp_class("v1", "ElementB").
 
 % class inheritance
@@ -39,23 +39,3 @@ ooasp_assoc("v1", "ElementB_moduleB", "ElementB", 1, 1, "ModuleB", 1, 1).
 partial(ooasp_instantiation("v1", "c1")).
 partial(ooasp_isa("c1", "ElementA", ("ElementA", 10..12))).
 partial(ooasp_isa("c1", "ElementB", ("ElementB", 13..14))).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% ooasp_isa("c1", "ElementA", ("ElementA", 10))
-% ooasp_isa("c1", "ElementA", ("ElementA", 11))
-% ooasp_isa("c1", "ElementA", ("ElementA", 12))
-% ooasp_isa("c1", "ElementB", ("ElementB", 13))
-% ooasp_isa("c1", "ElementB", ("ElementB", 14))
-
-
-% Due to: 
-%   ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, MIN_C2, MAX_C2),
-%   ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
-%   ooasp_isa(I, C, (C, O))
-%   ooasp_isa("c1", "ElementA", ("ElementA", 10))
-
-% ooasp_associated(I, A, (C1, O1), (C2, O2)) }
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
-
-

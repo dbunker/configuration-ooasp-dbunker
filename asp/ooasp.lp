@@ -119,14 +119,15 @@ ooasp_instantiation(M, I) :- ooasp_isa(I, C, O), ooasp_class(M, C).
 % Extend to superclasses
 
 % Base case
+% (CS, OS) is base (class, object)
 ooasp_full_isa(I, C, (CS, OS)) :-
     ooasp_isa(I, C, (CS, OS)).
 
 % Extend
 ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
     ooasp_instantiation(M, I),
-    ooasp_subclass(M, C, C_SUPER),
-    ooasp_full_isa(I, C, (CS, OS)).
+    ooasp_subclass(M, C_MID, C_SUPER),
+    ooasp_full_isa(I, C_MID, (CS, OS)).
 
 % #show ooasp_full_isa/3.
 
@@ -134,8 +135,8 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 % Generate ooasp_associated
 
 % Generate possible ooasp_associated based on assoc
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
+% Ex. ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
+% Ex. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 { ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) } :-
     ooasp_instantiation(M, I),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
@@ -143,7 +144,7 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
     ooasp_full_isa(I, C2, (CS2, OS2)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Generate instances needed from assoc
+% Generate instances needed based on assoc
 
 % Leaf class
 leaf_class(M, C) :-
@@ -156,7 +157,7 @@ leaf_class(M, C) :-
     leaf_class(M, C),
     ooasp_assoc(M, _, C, 1, 1, _, _, _).
 
-% Same for associated
+% Also instantiate associated
 :-  not ooasp_isa(I, C, (C, _)),
     ooasp_instantiation(M, I),
     leaf_class(M, C),
@@ -164,91 +165,62 @@ leaf_class(M, C) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Total count for each object to class pair
-_number_associated(I, (C1, O1), C2, NUM) :- 
+% Each associating class is attached to an associated class which exists, or must be created
+% Get the number of currently associated ex. ("ElementA", 10) has 1 associated "ModuleA"
+% This is limited by ooasp_assoc min and max
+
+% Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", _)).
+% EX. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
+
+% Total count for each associated object to class pair
+number_associated(I, (C1, (CS1, OS1)), C2, NUM) :-
     ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C1, (CS1, OS1)),
+    ooasp_full_isa(I, C2, (_, _)),
     ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
-    ooasp_associated(I, A, (C1, O1), (C2, _)), 
-    NUM = #count { C2, O2 : ooasp_associated(I, A, (C1, O1), (C2, O2)) }.
-#show _number_associated/4.
+    NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
-% Total count for each class to class pair
-_number_associated_pair(I, C1, C2, NUM) :- 
-    ooasp_instantiation(M, I),
-    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
-    ooasp_full_isa(I, C1, (CS1, _)), 
-    NUM = #count { CS2, OS2 : ooasp_associated(I, A, (_, _), (CS2, OS2)) }.
-#show _number_associated_pair/4.
+#show number_associated/4.
 
-% Total count for each class
-_number_class(I, C1, NUM) :- 
-    ooasp_full_isa(I, C1, (_, _)),
-    NUM = #count { C1, CS1, OS1 : ooasp_full_isa(I, C1, (CS1, OS1)) }.
-#show _number_class/3.
-
-% Must have at least enough classes to be associated where needed
-:-  _number_associated_pair(I, C1, C2, NUM_ASSOCIATED),
-    _number_class(I, C1, NUM_CLASS),
-    NUM_ASSOCIATED < NUM_CLASS.
-
-
-% :- not ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1)).
-% :- not ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 2))
-
-
-% ooasp_assoc("v1", "ElementA_moduleA", "ElementA", 1, 1, "ModuleA", 1, 1).
-
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_associated("c1", "ElementA_moduleA", ("ElementA", 10), ("ModuleA", 2))
-
-% _number_associated("c1", ("ElementA", 10), "ModuleA", NUM), NUM != 1
-
-% Set number associated based on max and min set by assoc
+% Set number associated based on min and max by assoc
 % Forbid too small
-:- _number_associated(I, (C1, O1), C2, NUM),
+:- number_associated(I, (C1, (CS1, OS1)), C2, NUM),
     ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C1, (CS1, OS1)),
+    ooasp_full_isa(I, C2, (_, _)),
     ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
     NUM < MIN_C2.
 
 % Forbid too large
-:- _number_associated(I, (C1, O1), C2, NUM),
+:- number_associated(I, (C1, (CS1, OS1)), C2, NUM),
     ooasp_instantiation(M, I),
+    ooasp_full_isa(I, C1, (CS1, OS1)),
+    ooasp_full_isa(I, C2, (_, _)),
     ooasp_assoc(M, A, C1, 1, 1, C2, MIN_C2, MAX_C2),
     NUM > MAX_C2.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Superclasses
+% For each associated (CS1, OS1), (CS2, OS2) (ex. ("ElementA", 10), ("ModuleA", 1))
+% if OS1_A and OS1_B are different OS2_A and OS2_B must also be different
+:-  ooasp_associated(I, A, (CS1, OS1_A), (CS2, OS2_A)),
+    ooasp_associated(I, A, (CS1, OS1_B), (CS2, OS2_B)),
+    OS1_A != OS1_B,
+    OS2_A == OS2_B.
 
-% ooasp_class_subclass(M, C1_SUPER, C1) :- ooasp_subclass(M, C1_SUPER, C1).
-% ooasp_class_subclass(M, C1, C1) :- ooasp_subclass(M, C1_SUPER, C1).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Superclass associations
 
 % Must have ooasp_associated for superclass
-% ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
-% ooasp_subclass("v1", "ElementA", "Element").
-:- not ooasp_associated(I, A_SUPER, (C1, O1), (C2, O2)),
+% Ex. ooasp_associated("c1", "Element_module", ("ElementA", 10), ("ModuleA", 1))
+% Ex. ooasp_subclass("v1", "ElementA", "Element")
+:- not ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)),
     ooasp_instantiation(M, I),
-    ooasp_associated(I, A, (C1, O1), (C2, O2)),
-    ooasp_assoc(M, A_SUPER, C1_SUPER, _, _, C2_SUPER, _, _),
-    ooasp_subclass(M, C1, C1_SUPER),
-    ooasp_subclass(M, C2, C2_SUPER).
+    ooasp_associated(I, AS, (CS1, OS1), (CS2, OS2)),
+    ooasp_assoc(M, A, C1, 1, 1, C2, _, _),
+    ooasp_full_isa(I, C1, (CS1, OS1)),
+    ooasp_full_isa(I, C2, (CS2, OS2)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Top Level
-
-% :- not ooasp_isa("c1", "ModuleA", ("ModuleA", 1)).
-
-% :- not ooasp_isa("c1", "Frame", ("Frame", 1)).
-
-% ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1)).
-
-% ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5).
-% :- not ooasp_isa(I, "Frame", ("Frame", _)),
-%     ooasp_instantiation(M, I),
-%     ooasp_assoc(M, "Frame_modules", "Frame", 1, 1, "Module", 0, 5).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Attribute Values
+% Attribute values
 
 
 

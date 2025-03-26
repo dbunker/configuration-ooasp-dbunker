@@ -328,7 +328,7 @@ def test(args):
         print("FAILURE")
 
 
-# Command: python run.py -e modules-encoding.lp -i instances/test -s solutions/modules
+# Command: python run.py -e modules-encoding.lp -i instances/modules -s solutions/modules
 def parse():
 
     parser = argparse.ArgumentParser(

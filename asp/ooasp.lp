@@ -106,6 +106,7 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
     ooasp_instantiation(M, I),
     ooasp_subclass(M, C_MID, C_SUPER),
     ooasp_full_isa(I, C_MID, (CS, OS)).
+
 % #show ooasp_full_isa/3.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,19 +131,20 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 % Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", _)).
 % EX. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 
-% Total count for each associated object to class pair C1 to C2 followed by max and min allowes
+% Total count for each associated object to class pair C1 to C2 followed by max and min allowed
 number_associated(I, (C1, (CS1, OS1)), C2, NUM, MIN_C2, MAX_C2) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_assoc(M, A, C1, _, _, C2, MIN_C2, MAX_C2),
     NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
-% Total count for each associated object to class pair C2 to C1 followed by max and min allowes
+% Total count for each associated object to class pair C2 to C1 followed by max and min allowed
 number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C2, (CS2, OS2)),
     ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, _, _),
     NUM = #count { CS1, OS1 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
+
 % #show number_associated/6.
 
 :-  number_associated(_, _, _, NUM, MIN, _),
@@ -172,7 +174,7 @@ number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     ooasp_associated(I, AS, (CS1, OS1), (CS2, OS2)),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_full_isa(I, C2, (CS2, OS2)),
-    ooasp_assoc(M, A, C1, 1, 1, C2, _, _).
+    ooasp_assoc(M, A, C1, _, _, C2, _, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Attribute values
@@ -189,7 +191,7 @@ number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Integer
 
-% The ooasp_attribute_value must have one integer value for integer
+% The ooasp_attribute_value must have one integer value for each
 { ooasp_attribute_value(I, AT, (CS, OS), VAL) } :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C, (CS, OS)),
@@ -278,13 +280,13 @@ number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
 % Instantiation of objects must be done in ascending order with no
 % gaps, unless the objects is given as part of the input partial
 % instantiation
-:- ooasp_isa(I, C, (C,ID1)), not partial(ooasp_isa(I, C, (C,ID1))),
+:-  ooasp_isa(I, C, (C,ID1)), not partial(ooasp_isa(I, C, (C,ID1))),
     possible_instance_id(ID2), ID2 < ID1, not ooasp_isa(I, C, (C,ID2)).
 
 % For each association, the mapping from the first object to the
 % second must be monotonic, unless the association is given as part of
 % the input partial instantiation
-:- ooasp_associated(I,A,O1,O2), not partial(ooasp_associated(I,A,O1,O2)),
+:-  ooasp_associated(I,A,O1,O2), not partial(ooasp_associated(I,A,O1,O2)),
     ooasp_associated(I,A,O3,O4), not partial(ooasp_associated(I,A,O3,O4)),
     O1 < O3, O4 < O2.
 

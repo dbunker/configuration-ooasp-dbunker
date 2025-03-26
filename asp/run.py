@@ -1,5 +1,3 @@
-import sys
-import shutil
 from subprocess import run, PIPE, TimeoutExpired
 import os
 
@@ -69,7 +67,7 @@ def parse_expr(tokens, i):
         '(' ArgList ')'           => (None, ( ... ))
       | NAME '(' ArgList ')'      => (NAME, ( ... ))
       | NAME                      => 'NAME'
-    
+
     Returns (node, new_index).
     """
     if i >= len(tokens):
@@ -191,6 +189,7 @@ def print_models(my_sol, ref_sol, in_mine):
         print("Mine:")
         print_model(my_sol)
 
+
 def show_solutions(ref_solutions_set, solutions_set, args):
 
     num_to_show = math.inf
@@ -214,10 +213,8 @@ def show_solutions(ref_solutions_set, solutions_set, args):
     my_ind = 0
     ref_ind = 0
 
-    ref_solutions = sorted([list(x) for x in list(ref_solutions_set)])
-    solutions = sorted([list(x) for x in list(solutions_set)])
-
-    print(ref_solutions == solutions)
+    ref_solutions = sorted([sorted(list(x)) for x in list(ref_solutions_set)])
+    solutions = sorted([sorted(list(x)) for x in list(solutions_set)])
 
     while (my_ind < len(solutions) or ref_ind < len(ref_solutions)) and (my_ind < num_to_show and ref_ind < num_to_show):
 
@@ -325,11 +322,11 @@ def test(args):
                 raise e
         print(message)
 
-    if success: print("SUCCESS")
-    else: print("FAILURE")
+    if success:
+        print("SUCCESS")
+    else:
+        print("FAILURE")
 
-
-# python test.py -e modules-encoding.lp -i instances/modules -s solutions/modules --opt -t 120
 
 # Command: python run.py -e modules-encoding.lp -i instances/test -s solutions/modules
 def parse():

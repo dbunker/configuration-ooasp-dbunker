@@ -128,7 +128,7 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 % Get the number of currently associated ex. ("ElementA", 10) has 1 associated "ModuleA"
 % This is limited by ooasp_assoc min and max
 
-% Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", _)).
+% Ex. ooasp_associated("c1", "Frame_modules", ("Frame", 1), ("ModuleA", 1)).
 % EX. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 
 % Total count for each associated object to class pair C1 to C2 followed by max and min allowed
@@ -226,7 +226,7 @@ number_associated(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     VAL > MAX. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Bolean
+% Boolean
 
 % Same construction for boolean
 { ooasp_attribute_value(I, AT, (CS, OS), VAL) } :-

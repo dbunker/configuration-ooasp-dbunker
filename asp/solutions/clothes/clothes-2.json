@@ -1,0 +1,54 @@
+{
+  "Solver": "clingo version 5.7.1",
+  "Input": [
+    "clothes-encoding.lp","instances/clothes/clothes-2.lp"
+  ],
+  "Call": [
+    {
+      "Witnesses": [
+        {
+          "Value": [
+            "ooasp_instantiation(\"v1\",\"c1\")", "ooasp_isa(\"c1\",\"Attire\",(\"Attire\",1))", "ooasp_attribute_value(\"c1\",\"cold_out\",(\"Attire\",1),\"TRUE\")", "ooasp_attribute_value(\"c1\",\"pants_shade\",(\"Attire\",1),\"Grey\")", "ooasp_isa(\"c1\",\"Flannel\",(\"Flannel\",1))", "ooasp_isa(\"c1\",\"Jeans\",(\"Jeans\",1))", "ooasp_isa(\"c1\",\"RightShoe\",(\"RightShoe\",1))", "ooasp_isa(\"c1\",\"LeftShoe\",(\"LeftShoe\",1))", "ooasp_associated(\"c1\",\"Attire_pants\",(\"Attire\",1),(\"Jeans\",1))", "ooasp_associated(\"c1\",\"Attire_top\",(\"Attire\",1),(\"Flannel\",1))", "ooasp_associated(\"c1\",\"Attire_right_shoe\",(\"Attire\",1),(\"RightShoe\",1))", "ooasp_associated(\"c1\",\"Attire_left_shoe\",(\"Attire\",1),(\"LeftShoe\",1))", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"LeftShoe\",1),1)", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"RightShoe\",1),1)", "ooasp_attribute_value(\"c1\",\"top_shade\",(\"Attire\",1),\"Grey\")"
+          ],
+          "Costs": [
+            5
+          ]
+        },
+        {
+          "Value": [
+            "ooasp_instantiation(\"v1\",\"c1\")", "ooasp_isa(\"c1\",\"Attire\",(\"Attire\",1))", "ooasp_attribute_value(\"c1\",\"cold_out\",(\"Attire\",1),\"TRUE\")", "ooasp_attribute_value(\"c1\",\"pants_shade\",(\"Attire\",1),\"Grey\")", "ooasp_isa(\"c1\",\"Flannel\",(\"Flannel\",1))", "ooasp_isa(\"c1\",\"Jeans\",(\"Jeans\",1))", "ooasp_isa(\"c1\",\"RightShoe\",(\"RightShoe\",1))", "ooasp_isa(\"c1\",\"LeftShoe\",(\"LeftShoe\",1))", "ooasp_associated(\"c1\",\"Attire_pants\",(\"Attire\",1),(\"Jeans\",1))", "ooasp_associated(\"c1\",\"Attire_top\",(\"Attire\",1),(\"Flannel\",1))", "ooasp_associated(\"c1\",\"Attire_right_shoe\",(\"Attire\",1),(\"RightShoe\",1))", "ooasp_associated(\"c1\",\"Attire_left_shoe\",(\"Attire\",1),(\"LeftShoe\",1))", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"LeftShoe\",1),1)", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"RightShoe\",1),1)", "ooasp_attribute_value(\"c1\",\"top_shade\",(\"Attire\",1),\"Grey\")"
+          ],
+          "Costs": [
+            5
+          ]
+        },
+        {
+          "Value": [
+            "ooasp_instantiation(\"v1\",\"c1\")", "ooasp_isa(\"c1\",\"Attire\",(\"Attire\",1))", "ooasp_attribute_value(\"c1\",\"cold_out\",(\"Attire\",1),\"TRUE\")", "ooasp_attribute_value(\"c1\",\"pants_shade\",(\"Attire\",1),\"Grey\")", "ooasp_isa(\"c1\",\"Flannel\",(\"Flannel\",1))", "ooasp_isa(\"c1\",\"Jeans\",(\"Jeans\",1))", "ooasp_isa(\"c1\",\"RightShoe\",(\"RightShoe\",1))", "ooasp_isa(\"c1\",\"LeftShoe\",(\"LeftShoe\",1))", "ooasp_associated(\"c1\",\"Attire_pants\",(\"Attire\",1),(\"Jeans\",1))", "ooasp_associated(\"c1\",\"Attire_top\",(\"Attire\",1),(\"Flannel\",1))", "ooasp_associated(\"c1\",\"Attire_right_shoe\",(\"Attire\",1),(\"RightShoe\",1))", "ooasp_associated(\"c1\",\"Attire_left_shoe\",(\"Attire\",1),(\"LeftShoe\",1))", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"LeftShoe\",1),2)", "ooasp_attribute_value(\"c1\",\"shoe_size\",(\"RightShoe\",1),2)", "ooasp_attribute_value(\"c1\",\"top_shade\",(\"Attire\",1),\"Grey\")"
+          ],
+          "Costs": [
+            5
+          ]
+        }
+      ]
+    }
+  ],
+  "Result": "OPTIMUM FOUND",
+  "Models": {
+    "Number": 3,
+    "More": "no",
+    "Optimum": "yes",
+    "Optimal": 2,
+    "Costs": [
+      5
+    ]
+  },
+  "Calls": 1,
+  "Time": {
+    "Total": 0.038,
+    "Solve": 0.001,
+    "Model": 0.000,
+    "Unsat": 0.000,
+    "CPU": 0.037
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Solver": "clingo version 5.7.1",
+  "Input": [
+    "clothes-encoding.lp","instances/clothes/clothes-6.lp"
+  ],
+  "Call": [
+    {
+
+    }
+  ],
+  "Result": "UNSATISFIABLE",
+  "Models": {
+    "Number": 0,
+    "More": "no"
+  },
+  "Calls": 1,
+  "Time": {
+    "Total": 0.036,
+    "Solve": 0.000,
+    "Model": 0.000,
+    "Unsat": 0.000,
+    "CPU": 0.035
+  }
+}

@@ -9,8 +9,6 @@
 :-  ooasp_instantiation("v1", I),
     ooasp_attribute_value(I, "position", (CS1, OS1), VAL_A),
     ooasp_attribute_value(I, "position", (CS2, OS2), VAL_B),
-	ooasp_full_isa(I, "Module", (CS1, OS1)),
-    ooasp_full_isa(I, "Module", (CS2, OS2)),
     (CS1, OS1) != (CS2, OS2),
     ooasp_associated(I, "Frame_modules", ("Frame", F_OS), (CS1, OS1)),
     ooasp_associated(I, "Frame_modules", ("Frame", F_OS), (CS2, OS2)),

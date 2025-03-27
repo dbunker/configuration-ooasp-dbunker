@@ -202,27 +202,6 @@ number_associated(I, (C2, (CS2, OS2)), C1, MIN_C1, MAX_C1, NUM) :-
     VAL >= MIN,
     VAL <= MAX.
 
-% Integer rule to follow
-integer_rule(I, AT, (CS, OS), MIN, MAX, VAL) :-  
-    ooasp_attribute_value(I, AT, (CS, OS), VAL),
-    ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "integer"),
-    ooasp_attribute_minInclusive(M, C, AT, MIN),
-    ooasp_attribute_maxInclusive(M, C, AT, MAX).
-
-% Enforce int rule
-:-  integer_rule(_, _, _, _, _, VAL),
-    not int_value(VAL).
-
-% Enforce min rule
-:-  integer_rule(_, _, _, MIN, _, VAL),
-    VAL < MIN.
-
-% Enforce max rule
-:-  integer_rule(_, _, _, _, MAX, VAL),
-    VAL > MAX. 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Boolean
 
@@ -232,16 +211,6 @@ integer_rule(I, AT, (CS, OS), MIN, MAX, VAL) :-
     ooasp_full_isa(I, C, (CS, OS)),
     ooasp_attribute(M, C, AT, "boolean"),
     bool_value(VAL).
-
-% Enforce bool value rule
-boolean_rule(I, AT, (CS, OS), VAL) :-  
-    ooasp_attribute_value(I, AT, (CS, OS), VAL),
-    ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "boolean").
-
-:-  boolean_rule(_, _, _, VAL),
-    not bool_value(VAL).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % String enums
@@ -253,16 +222,6 @@ boolean_rule(I, AT, (CS, OS), VAL) :-
     ooasp_full_isa(I, C, (CS, OS)),
     ooasp_attribute(M, C, AT, "string"),
     ooasp_attribute_enum(M, C, AT, VAL).
-
-% Enforce string value rule
-string_rule(I, AT, (CS, OS), M, C, VAL) :-  
-    ooasp_attribute_value(I, AT, (CS, OS), VAL),
-    ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "string").
-
-:-  string_rule(_, AT, _, M, C, VAL),
-    not ooasp_attribute_enum(M, C, AT, VAL).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Enforce exactly one value rule for all

@@ -132,30 +132,25 @@ ooasp_full_isa(I, C_SUPER, (CS, OS)) :-
 % EX. ooasp_assoc("v1", "Frame_modules", "Frame", 1, 1, "Module", 0, 5)
 
 % Total count for each associated object to class pair C1 to C2 followed by max and min allowed
-number_associated_c1(I, (C1, (CS1, OS1)), C2, NUM, MIN_C2, MAX_C2) :-
+number_associated(I, (C1, (CS1, OS1)), C2, MIN_C2, MAX_C2, NUM) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C1, (CS1, OS1)),
     ooasp_assoc(M, A, C1, _, _, C2, MIN_C2, MAX_C2),
     NUM = #count { CS2, OS2 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
 % Total count for each associated object to class pair C2 to C1 followed by max and min allowed
-number_associated_c2(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
+number_associated(I, (C2, (CS2, OS2)), C1, MIN_C1, MAX_C1, NUM) :-
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C2, (CS2, OS2)),
     ooasp_assoc(M, A, C1, MIN_C1, MAX_C1, C2, _, _),
     NUM = #count { CS1, OS1 : ooasp_associated(I, A, (CS1, OS1), (CS2, OS2)) }.
 
-% #show number_associated_c1/6.
-% #show number_associated_c2/6.
+% #show number_associated/6.
 
-:-  number_associated_c1(_, _, _, NUM, MIN, _),
+:-  number_associated(_, _, _, MIN, _, NUM),
     NUM < MIN.
-:-  number_associated_c1(_, _, _, NUM, _, MAX),
-    NUM > MAX.
 
-:-  number_associated_c2(_, _, _, NUM, MIN, _),
-    NUM < MIN.
-:-  number_associated_c2(_, _, _, NUM, _, MAX),
+:-  number_associated(_, _, _, _, MAX, NUM),
     NUM > MAX.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -207,27 +202,25 @@ number_associated_c2(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     VAL >= MIN,
     VAL <= MAX.
 
-% Enforce int rule
-:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
-    ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "integer"),
-    not int_value(VAL).
-
-% Enforce min rule
-:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+% Integer rule to follow
+integer_rule(I, AT, (CS, OS), MIN, MAX, VAL) :-  
+    ooasp_attribute_value(I, AT, (CS, OS), VAL),
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C, (CS, OS)),
     ooasp_attribute(M, C, AT, "integer"),
     ooasp_attribute_minInclusive(M, C, AT, MIN),
+    ooasp_attribute_maxInclusive(M, C, AT, MAX).
+
+% Enforce int rule
+:-  integer_rule(_, _, _, _, _, VAL),
+    not int_value(VAL).
+
+% Enforce min rule
+:-  integer_rule(_, _, _, MIN, _, VAL),
     VAL < MIN.
 
 % Enforce max rule
-:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
-    ooasp_instantiation(M, I),
-    ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "integer"),
-    ooasp_attribute_maxInclusive(M, C, AT, MAX),
+:-  integer_rule(_, _, _, _, MAX, VAL),
     VAL > MAX. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -241,10 +234,13 @@ number_associated_c2(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     bool_value(VAL).
 
 % Enforce bool value rule
-:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+boolean_rule(I, AT, (CS, OS), VAL) :-  
+    ooasp_attribute_value(I, AT, (CS, OS), VAL),
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "boolean"),
+    ooasp_attribute(M, C, AT, "boolean").
+
+:-  boolean_rule(_, _, _, VAL),
     not bool_value(VAL).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -259,10 +255,13 @@ number_associated_c2(I, (C2, (CS2, OS2)), C1, NUM, MIN_C1, MAX_C1) :-
     ooasp_attribute_enum(M, C, AT, VAL).
 
 % Enforce string value rule
-:-  ooasp_attribute_value(I, AT, (CS, OS), VAL),
+string_rule(I, AT, (CS, OS), M, C, VAL) :-  
+    ooasp_attribute_value(I, AT, (CS, OS), VAL),
     ooasp_instantiation(M, I),
     ooasp_full_isa(I, C, (CS, OS)),
-    ooasp_attribute(M, C, AT, "string"),
+    ooasp_attribute(M, C, AT, "string").
+
+:-  string_rule(_, AT, _, M, C, VAL),
     not ooasp_attribute_enum(M, C, AT, VAL).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
